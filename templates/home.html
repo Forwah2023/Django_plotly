@@ -1,0 +1,17 @@
+{%extends "base.html"%}
+{%load plotly_dash%}
+{% block title%}: Home {% endblock%}
+{%block content%}
+<h1>Dv-Lottery statistics</h1>
+<p>This dashboard displays various metrics and summary information on the Dv Lottery run by the U.S government.</p>
+
+<div>
+{%plotly_direct name="Simple" %}
+</div>
+
+{%endblock%}
+<!--
+<div>
+<a href= "{% url 'first' %}"> Demo One </a>
+</div>
+--!>

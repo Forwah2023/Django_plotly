@@ -1,0 +1,58 @@
+<!DOCTYPE HTML>
+<html>
+ <head>
+   {% load plotly_dash%}
+   {% load static%}
+   {% plotly_header%}
+   <title>{% block title%} Django Plotly Dash{% endblock%}</title>
+      <style>
+        /* Style the header */
+        header {
+            background-color: #1abc9c;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+
+        /* Style the logo */
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            text-decoration: none;
+            color: white;
+        }
+		#year-slider {
+			position: fixed;
+			height:350px;
+		}
+		
+		/* Responsive styles */
+		@media (max-width: 768px) {
+			#block-graph {
+				display: block;
+				width: 100%;
+			}
+		}
+    </style>
+ </head>
+ <body>
+    <header>
+        <a href="#" class="logo">Dash and Plotly app embedded in Django</a>
+        <nav>
+            <a href="#">Home</a>
+            <a href="#">About</a>
+            <a href="#">Services</a>
+            <a href="#">Contact</a>
+        </nav>
+    </header>
+   <main>
+     {% block main_top%}{% endblock%}
+     <div class="container">
+       {% block content%}{% endblock%}
+     </div>
+   </main>
+   {% block footer%}
+   {% endblock%}
+ </body>
+ {% plotly_footer%}
+</html>
