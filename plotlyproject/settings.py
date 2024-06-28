@@ -39,9 +39,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django_plotly_dash.apps.DjangoPlotlyDashConfig',
     #third party
+    'dashapps.apps.DashappsConfig',
+    'django_plotly_dash.apps.DjangoPlotlyDashConfig',
     'dpd_static_support',
+    'django_bootstrap5',
 ]
 
 MIDDLEWARE = [
@@ -127,14 +129,63 @@ STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STORAGES = {
     "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
     },
 }
+STATICFILES_FINDERS = [
 
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+
+    'django_plotly_dash.finders.DashAssetFinder',
+    'django_plotly_dash.finders.DashComponentFinder',
+    'django_plotly_dash.finders.DashAppDirectoryFinder',
+]
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
+# DJANGO-PLOTLY
 X_FRAME_OPTIONS = 'SAMEORIGIN'
+
+PLOTLY_DASH = {
+
+    # Route used for the message pipe websocket connection
+    "ws_route" :   "dpd/ws/channel",
+
+    # Route used for direct http insertion of pipe messages
+    "http_route" : "dpd/views",
+
+    # Flag controlling existince of http poke endpoint
+    "http_poke_enabled" : True,
+
+    # Insert data for the demo when migrating
+    "insert_demo_migrations" : False,
+
+    # Timeout for caching of initial arguments in seconds
+    "cache_timeout_initial_arguments": 60,
+
+    # Name of view wrapping function
+    "view_decorator": None,
+
+    # Flag to control location of initial argument storage
+    "cache_arguments": True,
+
+    # Flag controlling local serving of assets
+    "serve_locally": True,
+}
+
+
+PLOTLY_COMPONENTS = [
+
+    # Common components (ie within dash itself) are automatically added
+
+    # django-plotly-dash components
+    'dpd_components',
+    # static support if serving local assets
+    'dpd_static_support',
+
+    # Other components, as needed
+    'dash_bootstrap_components',
+]

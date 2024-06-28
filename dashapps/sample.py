@@ -4,8 +4,9 @@ import pandas as pd
 import numpy as np
 import plotly.express as px
 from django_plotly_dash import DjangoDash
+import dash_bootstrap_components as dbc
 
-app = DjangoDash('Simple')
+app = DjangoDash('Simple',add_bootstrap_links=True)
 
 style_text={
     'textAlign': 'center',
@@ -25,13 +26,12 @@ style_dropdown={
     'margin': '0 auto',
     }
 style_slider={
-    'position': 'relative',
-    'width': '4%',
-    'height': '300px',
-    'margin': '0 auto',
-    'zIndex': '9999',
-    'display': 'inline-block', 
-    'vertical-align': 'top'}
+    'position': 'fixed',
+    'height': '400px',
+    'padding-right':'35px',
+    'right':'0',
+    'zIndex': '9999', 
+    }
     
 style_container=style={
     'width': '100%'
@@ -81,68 +81,56 @@ reg_list=""
 default_yr=2023
 
 # APP Layout
-app.layout =html.Div(children=[
-    html.Div([
-        dcc.Slider(
-            id='year-slider',
-            min=2013,
-            max=2024,
-            step=1,
-            value=default_yr,
-            marks={str(year): str(year) for year in range(2013, 2025)},
-            vertical=True,
+left_row_0=dbc.Row(
+                html.Div([
+                    dcc.Slider(
+                        id='year-slider',
+                        min=2013,
+                        max=2024,
+                        step=1,
+                        value=default_yr,
+                        marks={str(year): str(year) for year in range(2013, 2025)},
+                        vertical=True
+                    )
+                ],style=style_slider)
             )
-        ], style=style_slider),
-    html.Div(children=[
-        html.P(children='Select DV Year', style=style_text),
-        html.Div([
-            html.Div([
-            html.P(children="Select Region:",style=style_text),
-            dcc.RadioItems(
-                        [],
-                        "",
-                        id="reg-dropdown",
-                        inline=True
-                    ),
-            ])
-        ]),
-        html.Div([
-            html.Div([
-                 html.Div([
-                    dcc.Graph(id="area-graph")
-                 ],style={'display':'inline-block','width':'49%'},id='block-graph'),        
-                 html.Div([
-                    dcc.Graph(id="reg-graph")
-                 ],style={'display':'inline-block','width':'49%'},id='block-graph')
-             ])
-             ,
-             html.P(children="Select embassy :",style=style_text),
-             dcc.Dropdown(
-                                       [],
-                                        "",
-                                        id="emb-dropdown",
-                                        style=style_dropdown 
-                                    )
-             ,
-             html.Div([
-                  html.Div([
-                    dcc.Graph(id="emb-graph")
-                    ],style={'display':'inline-block','width':'39%'}),
-                  html.Div([
-                    dcc.Graph(id="emb-area-graph")  
-                 ],style={'display':'inline-block','width':'60%'})   
-             ])
-            ,
-             html.Div([
-             dcc.Graph(id="holes-graph") 
-             ]),
-             html.Div([
-             dcc.Graph(id="global-deriv-graph") 
-             ]),
-             html.Div([],id="hidden-div") 
-        ])
-    ],style=style_left_container)
-    ],style=style_container)
+right_row_1=dbc.Row(dbc.Col(html.P(children="Select Region:",style=style_text) ))
+right_row_2=dbc.Row(dbc.Col(dcc.RadioItems([],"",id="reg-dropdown",inline=True,style=style_text)))
+right_row_3=dbc.Row([
+                        dbc.Col(html.Div(dcc.Graph(id="area-graph"), id='top_right_div1'),lg=6),
+                        dbc.Col(html.Div(dcc.Graph(id="reg-graph"),id='top_right_div2'),lg=6)                 
+                    ]
+     
+            )
+right_row_4=dbc.Row(dbc.Col(html.Div([dcc.Graph(id="holes-graph")])))            
+right_row_5=dbc.Row( html.P(children="Select embassy :",style=style_text),justify="center")
+
+right_row_6=dbc.Row( dcc.Dropdown([],"",id="emb-dropdown",style=style_dropdown ))
+right_row_7=dbc.Row([
+                        dbc.Col(html.Div([dcc.Graph(id="emb-graph")]),lg=6),
+                        dbc.Col(html.Div([dcc.Graph(id="emb-area-graph")]),lg=6)   
+                    ]
+            )
+right_row_8=dbc.Row(dbc.Col(html.Div([dcc.Graph(id="global-deriv-graph")])))
+
+app.layout =dbc.Container(
+                dbc.Row([
+                        dbc.Col(left_row_0,lg=1, className="sticky-top"
+                               ),
+                        dbc.Col([
+                                right_row_1,
+                                right_row_2,
+                                right_row_3,
+                                right_row_4,
+                                right_row_5,
+                                right_row_6,
+                                right_row_7,
+                                right_row_8
+                                ],lg=11
+                               )
+                        ]
+                ),fluid=True
+            )
 
 # set embassy list
 def set_emb_list(region):
@@ -206,7 +194,9 @@ def display_stats_reg(reg_choice,session_state=None):
     #Area and bar chart for regions
     Grouped_area_df_reg=prepare_area_plot_data_reg(reg_choice)
     fig_area_reg = px.area(Grouped_area_df_reg, x=Grouped_area_df_reg.index, y=Grouped_area_df_reg.columns,title=f"Status distribution across case numbers ({reg_choice})")
+    fig_area_reg.update_layout(margin={"r":0,"t":50,"l":0,"b":50}) 
     fig_reg = px.bar(Grouped_regions, x=Grouped_regions.index, y=Grouped_regions.columns, title="Regional statistics", barmode='group')    
+    fig_reg.update_layout(margin={"r":0,"t":50,"l":0,"b":50}) 
     # Holes chart
     fig_holes = px.pie(Grouped_holes, values='holes', names='region',title="Holes distribution across regions")
     #save current region
@@ -222,6 +212,7 @@ def display_stats_reg(reg_choice,session_state=None):
 def display_stats_emb(emb_choice,session_state=None):
     Grouped_sub_ceac_emb=prepare_area_plot_data_emb(emb_choice)
     fig_area_emb=px.area(Grouped_sub_ceac_emb, x=Grouped_sub_ceac_emb.index, y=Grouped_sub_ceac_emb.columns,title=f"Status distribution across case numbers ({emb_choice})")
+    fig_area_emb.update_layout(margin={"r":0,"t":50,"l":0,"b":50}) 
     #Embassy plots
     try:
         emb=Grouped_consul.loc[emb_choice]
@@ -230,7 +221,8 @@ def display_stats_emb(emb_choice,session_state=None):
         return
     emb=emb.to_frame(name='Count').reset_index()
     emb.columns=['Status','Sub category','Count']
-    fig_emb = px.bar(emb, x="Status", y="Count", color="Sub category", title=f"Embassy statistics ({emb_choice})") 
+    fig_emb = px.bar(emb, x="Status", y="Count", color="Sub category", title=f"Embassy statistics ({emb_choice})")
+    fig_emb.update_layout(margin={"r":0,"t":50,"l":0,"b":50}) 
     Global_derivative=prepare_global_derivative()
     fig_global = px.choropleth(Global_derivative, locations="iso_alpha",color="Issued avg_derivative",hover_name="country")
     fig_global.update_layout(margin={"r":0,"t":0,"l":0,"b":0})

@@ -21,18 +21,6 @@
             text-decoration: none;
             color: white;
         }
-		#year-slider {
-			position: fixed;
-			height:350px;
-		}
-		
-		/* Responsive styles */
-		@media (max-width: 768px) {
-			#block-graph {
-				display: block;
-				width: 100%;
-			}
-		}
     </style>
  </head>
  <body>
@@ -53,6 +41,7 @@
    </main>
    {% block footer%}
    {% endblock%}
+
  </body>
  {% plotly_footer%}
 </html>
