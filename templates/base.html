@@ -1,14 +1,21 @@
 <!DOCTYPE HTML>
-<html>
+<html  lang="en">
+ <meta charset="utf-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1">
+ <meta name="description" content="Django Plotly Dash App">
+ <meta name="author" content="Forwah Amstrong Tah, Ph.D">
  <head>
    {% load plotly_dash%}
    {% load static%}
    {% plotly_header%}
+   {% load django_bootstrap5 %}
+   {% bootstrap_css %}
+   {% bootstrap_javascript %}
    <title>{% block title%} Django Plotly Dash{% endblock%}</title>
       <style>
         /* Style the header */
         header {
-            background-color: #1abc9c;
+            background-color: #20c997;
             color: white;
             text-align: center;
             padding: 20px;
@@ -21,16 +28,21 @@
             text-decoration: none;
             color: white;
         }
+		/* Style the Nav links*/
+		.mynav-link{
+		 font-weight: bold;
+		 color: white;
+		}
     </style>
  </head>
  <body>
     <header>
         <a href="#" class="logo">Dash and Plotly app embedded in Django</a>
         <nav>
-            <a href="#">Home</a>
-            <a href="#">About</a>
-            <a href="#">Services</a>
-            <a href="#">Contact</a>
+            <a href="#" class="mynav-link">Home</a>
+            <a href="#" class="mynav-link">About</a>
+            <a href="#" class="mynav-link">Services</a>
+            <a href="#" class="mynav-link">Contact</a>
         </nav>
     </header>
    <main>
@@ -41,7 +53,6 @@
    </main>
    {% block footer%}
    {% endblock%}
-
  </body>
  {% plotly_footer%}
 </html>

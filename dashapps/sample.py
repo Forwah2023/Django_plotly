@@ -26,11 +26,8 @@ style_dropdown={
     'margin': '0 auto',
     }
 style_slider={
-    'position': 'fixed',
-    'height': '400px',
-    'padding-right':'35px',
-    'right':'0',
-    'zIndex': '9999', 
+'position': 'fixed',
+ 'zIndex': '99', 
     }
     
 style_container=style={
@@ -81,7 +78,7 @@ reg_list=""
 default_yr=2023
 
 # APP Layout
-left_row_0=dbc.Row(
+right_row_0=dbc.Row(
                 html.Div([
                     dcc.Slider(
                         id='year-slider',
@@ -94,40 +91,40 @@ left_row_0=dbc.Row(
                     )
                 ],style=style_slider)
             )
-right_row_1=dbc.Row(dbc.Col(html.P(children="Select Region:",style=style_text) ))
-right_row_2=dbc.Row(dbc.Col(dcc.RadioItems([],"",id="reg-dropdown",inline=True,style=style_text)))
-right_row_3=dbc.Row([
+left_row_1=dbc.Row(dbc.Col(html.P(children="Select Region:",style=style_text) ))
+left_row_2=dbc.Row(dbc.Col(dcc.RadioItems([],"",id="reg-dropdown",inline=True,style=style_text)))
+left_row_3=dbc.Row([
                         dbc.Col(html.Div(dcc.Graph(id="area-graph"), id='top_right_div1'),lg=6),
                         dbc.Col(html.Div(dcc.Graph(id="reg-graph"),id='top_right_div2'),lg=6)                 
                     ]
      
             )
-right_row_4=dbc.Row(dbc.Col(html.Div([dcc.Graph(id="holes-graph")])))            
-right_row_5=dbc.Row( html.P(children="Select embassy :",style=style_text),justify="center")
+left_row_4=dbc.Row(dbc.Col(html.Div([dcc.Graph(id="holes-graph")])))            
+left_row_5=dbc.Row( html.P(children="Select embassy :",style=style_text),justify="center")
 
-right_row_6=dbc.Row( dcc.Dropdown([],"",id="emb-dropdown",style=style_dropdown ))
-right_row_7=dbc.Row([
+left_row_6=dbc.Row( dcc.Dropdown([],"",id="emb-dropdown",style=style_dropdown ))
+left_row_7=dbc.Row([
                         dbc.Col(html.Div([dcc.Graph(id="emb-graph")]),lg=6),
                         dbc.Col(html.Div([dcc.Graph(id="emb-area-graph")]),lg=6)   
                     ]
             )
-right_row_8=dbc.Row(dbc.Col(html.Div([dcc.Graph(id="global-deriv-graph")])))
+left_row_8=dbc.Row(dbc.Col(html.Div([dcc.Graph(id="global-deriv-graph")])))
 
 app.layout =dbc.Container(
-                dbc.Row([
-                        dbc.Col(left_row_0,lg=1, className="sticky-top"
-                               ),
+                dbc.Row([              
                         dbc.Col([
-                                right_row_1,
-                                right_row_2,
-                                right_row_3,
-                                right_row_4,
-                                right_row_5,
-                                right_row_6,
-                                right_row_7,
-                                right_row_8
-                                ],lg=11
-                               )
+                                left_row_1,
+                                left_row_2,
+                                left_row_3,
+                                left_row_4,
+                                left_row_5,
+                                left_row_6,
+                                left_row_7,
+                                left_row_8
+                                ],xs={"size":11,"order":2,"offset":0},lg={"size":11,"order":1,"offset":0}
+                               ),
+                        dbc.Col(right_row_0,xs={"size":1,"order":1,"offset":10},lg={"size":1,"order":2,"offset":0}
+                               )                                
                         ]
                 ),fluid=True
             )
