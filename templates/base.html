@@ -22,10 +22,9 @@
         }
 
         /* Style the logo */
-        .logo {
-            font-size: 24px;
+        .header_text {
             font-weight: bold;
-            text-decoration: none;
+             font-style: italic;
             color: white;
         }
 		/* Style the Nav links*/
@@ -33,16 +32,22 @@
 		 font-weight: bold;
 		 color: white;
 		}
+		/* About box description*/
+		.description {
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 10px;
+			margin-top: 20px;
+			border: 5px dotted lightgreen; 
     </style>
  </head>
  <body>
     <header>
-        <a href="#" class="logo">Dash and Plotly app embedded in Django</a>
+		<h1>Dv-Lottery statistics</h1>
+        <h6 class="header_text">A Dash and Plotly app embedded in Django</h6>
         <nav>
             <a href="#" class="mynav-link">Home</a>
-            <a href="#" class="mynav-link">About</a>
-            <a href="#" class="mynav-link">Services</a>
-            <a href="#" class="mynav-link">Contact</a>
+			<a href="#" class="mynav-link">Contact</a>
         </nav>
     </header>
    <main>

@@ -91,7 +91,7 @@ right_row_0=dbc.Row(
                     )
                 ],style=style_slider)
             )
-left_row_1=dbc.Row(dbc.Col(html.P(children="Select Region:",style=style_text) ))
+left_row_1=dbc.Row(dbc.Col(html.P(children="Select Region below (or year from the adjacent slider)",style=style_text) ))
 left_row_2=dbc.Row(dbc.Col(dcc.RadioItems([],"",id="reg-dropdown",inline=True,style=style_text)))
 left_row_3=dbc.Row([
                         dbc.Col(html.Div(dcc.Graph(id="area-graph"), id='top_right_div1'),lg=6),
@@ -110,7 +110,55 @@ left_row_7=dbc.Row([
             )
 left_row_8=dbc.Row(dbc.Col(html.Div([dcc.Graph(id="global-deriv-graph")])))
 
-app.layout =dbc.Container(
+
+about_tab=dbc.Row(dbc.Col(
+        html.Div([
+        html.H4("About this App "),
+        html.P(["This Dash app was built to provide detailed and complementary information on the DV-lottery program run by the U.S governmwent.\
+        It was inspired by a similar app from ",html.A('DV Lottery Charts', href='https://dvcharts.xarthisius.xyz/ceacFY24.html'), ",and the data\
+        is uses comes from that website. This app complements that website by providing more information on Holes (see glossary below), \
+        Global derivative distribution, comparative performance across DV-years, and more comple visualizations. This app was built using ",\
+        html.A('Plotly Dash', href='https://dash.plotly.com/')," , ",html.A('django-plotly-dash', href='https://django-plotly-dash.readthedocs.io/'),\
+        " , ",html.A('Dash Bootstrap Components', href='https://dash-bootstrap-components.opensource.faculty.ai/') ," , "," Python and Django.",
+        
+               ]
+        ),
+        html.H4("About the DV-Lottery process and data"),
+        html.P("The Diversity Immigrant Visa (DV) Program, also known as the Green Card Lottery, awards up to 50,000 immigrant visas each year. \
+        It's designed to diversify U.S. immigration by making immigrant visas available to citizens of countries with low immigration rates."),
+        html.P("Here's how it works:"),
+        html.Ul([
+        html.Li([html.B("Eligibility : "), " Citizens of eligible countries can apply during the designated period. The application process is straightforward \
+        and free."]),
+        html.Li([html.B("Random Selection : "), " Applicants enter the lottery online between early October and early November. A computer randomly selects\
+        winners from the pool of applicants."]),
+        html.Li([html.B("Winners and Green Cards : "), " If selected, winners and their immediate families receive green cards, granting them permanent residency\
+        in the U.S. Less than 1% of applications win, so it's a chance-based opportunity."]),
+        html.Li([html.B("CEAC data: ")," CEAC data for the DV-Lottery contains information about all the cases selected (including selected and disqualified) for a given\
+        fiscal year, obtained from the Consular Electronic Application Center of the U.S. Department of State.\
+        It provides relevant details about interviews conducted in the current DV Program, including visa issuance, administrative processing,\
+        and refusals."]),
+                ]
+        ),
+        html.P(["Learn more at ",html.A('travel.state.gov', href='https://travel.state.gov/content/travel/en/us-visas/immigrate/diversity-visa-program-entry.html'), ]),
+        html.H4("Glossary"),
+        html.Ul([
+            html.Li(html.B("Holes :"), " Applicants to the Dv-Lottery who got selected during the initial selection then got disqualified for undisclosed reasons."),
+            html.Li([html.B("Issued : "), " Cases whose visas got approved."]),
+            html.Li([html.B("AP(Administrative Processing):")," Cases that are undergoing additional review or clearance by a consular officer. It’s a temporary status while the case is pending further investigation."]),
+            html.Li([html.B("221g Refused : "), " Refusals under section 221(g) of the Immigration and Nationality Act. These cases require additional documentation or processing before a final decision can be made."]),
+            html.Li([html.B("Refused : "), "Cases that got denied visas."]),
+            html.Li([html.B("Ready: "), " Cases that are ready for visa issuance pending administrative processing or other final steps."]),
+            html.Li([html.B("Sum : "), " The total number of cases in each category including derivatives."]),
+            html.Li([html.B("Cases : "), " The total number of cases in each category without derivatives"]),
+            html.Li([html.B("NVC : "), " Cases pending initial processing, post selection "]),
+            html.Li([html.B("Derivative: "), " Dependent on a DV-Lottery case."]),
+        ]),
+                  ]
+        ),class_name="description"               
+                  )
+           )
+explore_tab=dbc.Container(
                 dbc.Row([              
                         dbc.Col([
                                 left_row_1,
@@ -128,6 +176,27 @@ app.layout =dbc.Container(
                         ]
                 ),fluid=True
             )
+            
+sources_tab=dbc.Row(dbc.Col(
+                        html.Div([
+                                dbc.Button("GitHub", href='', color="primary", target="_blank")
+                                 ]
+                        ),
+                        width={"size": 6, "offset": 2}, class_name="mt-5"
+                    ),
+                    
+            )
+
+app.layout=dbc.Tabs(
+    [
+        dbc.Tab(about_tab, label="About",label_style=style_text),
+        dbc.Tab(explore_tab, label="Explore",label_style=style_text),
+        dbc.Tab(sources_tab, label="Code",label_style=style_text),
+    ],
+    id="tabs",
+    active_tab="tab-1",
+)
+
 
 # set embassy list
 def set_emb_list(region):
