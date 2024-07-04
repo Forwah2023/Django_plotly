@@ -42,27 +42,27 @@ def cases(s):
 def holes(s):
     return sum(s.isna())
     
-def avg_derivative(s):
+def avg_der(s):
     try:
         return (sum(s)/sum(s>=1))-1
     except ZeroDivisionError:
         return 0
 
-#aggregation cols
-agg_cols=['Issued','Refused','Refused221g','Ready','NVC','InTransit','Transfer','AP']
+#aggregation columns,numeric.
+agg_cols=['Issued','Refused','Refused221g','Ready','NVC','AP']  # Excluded and 'InTransit','Transfer',
+#Shorter legend labels for viewing plots on mbobile devices
+short_legend_lable=['Hole_C','Iss_C','Ref._C','221g_C','Rdy_C','NVC_C','AP_C']
 
 # ISO country data
 ISO_country_df=pd.read_pickle('ISO_ALPHA.pkl')
 
-# Aggregation dictionary for area plot totals
-agg_dict = {'status':[holes],
+# Aggregation dictionary for area plot totals. Excluded ,'InTransit':[cases],'Transfer':[cases],
+agg_dict = {'status':[holes],            
             'Issued':[cases],
             'Refused':[cases],
             'Refused221g':[cases],
             'Ready':[cases],
             'NVC':[cases],
-            'InTransit':[cases],
-            'Transfer':[cases],
             'AP':[cases],
            }
 # Global variables availble to many callbacks with their placeholder values
@@ -213,7 +213,7 @@ def initialization(year):
     Grouped_regions.dropna(inplace=True)
     level0 =Grouped_regions.columns.get_level_values(0)
     level1 =Grouped_regions.columns.get_level_values(1)
-    Grouped_regions.columns=level0 + '_' + level1
+    Grouped_regions.columns=['Iss','Iss_C','Ref.','Ref._C','221g','221g_C','Rdy','Rdy_C','NVC','NVC_C','AP','AP_C']  # Enable for full lables =level0 + '_' + level1
     # Holes count
     Grouped_holes=ceac.groupby(['region'],observed=True)['status'].agg([holes]).reset_index()
     #Embassy-specific stats
@@ -290,7 +290,7 @@ def display_stats_emb(emb_choice,session_state=None):
     fig_emb = px.bar(emb, x="Status", y="Count", color="Sub category", title=f"Embassy statistics ({emb_choice})")
     fig_emb.update_layout(margin={"r":0,"t":50,"l":0,"b":50}) 
     Global_derivative=prepare_global_derivative()
-    fig_global = px.choropleth(Global_derivative, locations="iso_alpha",color="Issued avg_derivative",hover_name="country")
+    fig_global = px.choropleth(Global_derivative, locations="iso_alpha",color="Issued avg_der",hover_name="country")
     fig_global.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
     #save current embassy
     session_state["last_emb"]=emb_choice
@@ -310,7 +310,7 @@ def prepare_area_plot_data_reg(reg_choice):
     Grouped_sub_ceac_reg=sub_ceac_reg.groupby(['Case_ranges'],observed=True).agg(agg_dict)
     level0 =Grouped_sub_ceac_reg.columns.get_level_values(0)
     level1 =Grouped_sub_ceac_reg.columns.get_level_values(1)
-    Grouped_sub_ceac_reg.columns = level0 + '_' + level1
+    Grouped_sub_ceac_reg.columns =short_legend_lable  # Enable for full lables =level0 + '_' + level1 
     Grouped_sub_ceac_reg.index=Grouped_sub_ceac_reg.index.astype('str') 
     
     
@@ -330,13 +330,13 @@ def prepare_area_plot_data_emb(emb_choice):
     Grouped_sub_ceac_emb=sub_ceac_emb.groupby(['Case_ranges'],observed=True).agg(agg_dict)
     level0 =Grouped_sub_ceac_emb.columns.get_level_values(0)
     level1 =Grouped_sub_ceac_emb.columns.get_level_values(1)
-    Grouped_sub_ceac_emb.columns = level0 + '_' + level1
+    Grouped_sub_ceac_emb.columns =short_legend_lable # Enable for full legend lables =level0 + '_' + level1  
     Grouped_sub_ceac_emb.index=Grouped_sub_ceac_emb.index.astype('str')
     return Grouped_sub_ceac_emb    
 
 def prepare_global_derivative():
     agg_cols=['Issued']
-    Grouped_consul=ceac.groupby(['consulate'],observed=True)[agg_cols].agg([avg_derivative])
+    Grouped_consul=ceac.groupby(['consulate'],observed=True)[agg_cols].agg([avg_der])
     Grouped_consul.columns=Grouped_consul.columns.get_level_values(0)+' '+Grouped_consul.columns.get_level_values(1)
     Grouped_consul=Grouped_consul.reset_index()
     Global_derivative=Grouped_consul.merge(ISO_country_df,how='left',on='consulate')
