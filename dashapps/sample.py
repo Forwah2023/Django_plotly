@@ -51,7 +51,7 @@ def avg_der(s):
 #aggregation columns,numeric.
 agg_cols=['Issued','Refused','Refused221g','Ready','NVC','AP']  # Excluded and 'InTransit','Transfer',
 #Shorter legend labels for viewing plots on mbobile devices
-short_legend_lable=['Hole_C','Iss_C','Ref._C','221g_C','Rdy_C','NVC_C','AP_C']
+short_legend_lable=['Hole_C','Iss_C','Ref_C','221g_C','Rdy_C','NVC_C','AP_C']
 
 # ISO country data
 ISO_country_df=pd.read_pickle('ISO_ALPHA.pkl')
@@ -142,17 +142,19 @@ about_tab=dbc.Row(dbc.Col(
         ),
         html.P(["Learn more at ",html.A('travel.state.gov', href='https://travel.state.gov/content/travel/en/us-visas/immigrate/diversity-visa-program-entry.html'), ]),
         html.H4("Glossary"),
+        html.P(["The default scope for some of the variables below includes cases and derivatives, except when a",html.Strong(" ' _C '")," is appended to the variables \
+        name, denoting cases only; without their derivatives."]),
         html.Ul([
-            html.Li(html.B("Holes :"), " Applicants to the Dv-Lottery who got selected during the initial selection then got disqualified for undisclosed reasons."),
-            html.Li([html.B("Issued : "), " Cases whose visas got approved."]),
+            html.Li([html.B("Hole :"), " Applicants to the Dv-Lottery who got selected during the initial selection then got disqualified for undisclosed reasons."]),
+            html.Li([html.B("Iss(Issued) : "), " Cases whose visas got approved."]),
             html.Li([html.B("AP(Administrative Processing):")," Cases that are undergoing additional review or clearance by a consular officer. It’s a temporary status while the case is pending further investigation."]),
-            html.Li([html.B("221g Refused : "), " Refusals under section 221(g) of the Immigration and Nationality Act. These cases require additional documentation or processing before a final decision can be made."]),
-            html.Li([html.B("Refused : "), "Cases that got denied visas."]),
-            html.Li([html.B("Ready: "), " Cases that are ready for visa issuance pending administrative processing or other final steps."]),
-            html.Li([html.B("Sum : "), " The total number of cases in each category including derivatives."]),
-            html.Li([html.B("Cases : "), " The total number of cases in each category without derivatives"]),
-            html.Li([html.B("NVC : "), " Cases pending initial processing, post selection "]),
-            html.Li([html.B("Derivative: "), " Dependent on a DV-Lottery case."]),
+            html.Li([html.B("221g( Refused ) : "), " Refusals under section 221(g) of the Immigration and Nationality Act. These cases require additional documentation or processing before a final decision can be made."]),
+            html.Li([html.B("Ref (Refused) : "), "Cases that got denied visas."]),
+            html.Li([html.B("Rdy( Ready): "), " Cases that are ready for visa issuance pending administrative processing or other final steps."]),
+            html.Li([html.B("NVC (National Visa Center) : "), " Cases pending initial processing, post selection. "]),
+            html.Li([html.B("der( Derivative) : "), " Dependent on a DV-Lottery case."]),
+            html.Li([html.B("avg_der( Average Derivative) : "), " Average derivative per case."]),
+            html.Li([html.B(" Sum : "), " The total number of cases in each category including derivatives."]),         
         ]),
                   ]
         ),class_name="description"               
@@ -213,7 +215,7 @@ def initialization(year):
     Grouped_regions.dropna(inplace=True)
     level0 =Grouped_regions.columns.get_level_values(0)
     level1 =Grouped_regions.columns.get_level_values(1)
-    Grouped_regions.columns=['Iss','Iss_C','Ref.','Ref._C','221g','221g_C','Rdy','Rdy_C','NVC','NVC_C','AP','AP_C']  # Enable for full lables =level0 + '_' + level1
+    Grouped_regions.columns=['Iss','Iss_C','Ref','Ref_C','221g','221g_C','Rdy','Rdy_C','NVC','NVC_C','AP','AP_C']  # Enable for full lables =level0 + '_' + level1
     # Holes count
     Grouped_holes=ceac.groupby(['region'],observed=True)['status'].agg([holes]).reset_index()
     #Embassy-specific stats
@@ -232,7 +234,7 @@ def on_year_change(year,session_state=None):
     global reg_list
     initialization(year)
     #previous region. Necessary to trigger a refresh of the page
-    prev_reg=session_state.get('last_reg',reg_list[0])
+    prev_reg=session_state.get('last_reg',reg_list[0])################################change reg_list[0] to None
     # Two return to cover cases where the previous region is not in the current year allowed regions
     if prev_reg in reg_list:
         return reg_list,prev_reg
