@@ -76,6 +76,8 @@ Grouped_consul=""
 emblist=""
 reg_list=""
 default_yr=2023
+#load historical data
+historical_data=pd.read_pickle('ceac_pkl/historical_CEAC')
 
 # APP Layout
 right_row_0=dbc.Row(
@@ -94,12 +96,16 @@ right_row_0=dbc.Row(
 left_row_1=dbc.Row(dbc.Col(html.P(children="Select Region below (or year from the adjacent slider)",style=style_text) ))
 left_row_2=dbc.Row(dbc.Col(dcc.RadioItems([],"",id="reg-dropdown",inline=True,style=style_text)))
 left_row_3=dbc.Row([
-                        dbc.Col(html.Div(dcc.Graph(id="area-graph"), id='top_right_div1'),lg=6),
-                        dbc.Col(html.Div(dcc.Graph(id="reg-graph"),id='top_right_div2'),lg=6)                 
+                        dbc.Col(html.Div(dcc.Graph(id="area-graph")),lg=6),
+                        dbc.Col(html.Div([dcc.Graph(id="historical-graph")]),lg=6)                          
                     ]
      
             )
-left_row_4=dbc.Row(dbc.Col(html.Div([dcc.Graph(id="holes-graph")])))            
+left_row_4=dbc.Row( [
+                        dbc.Col(html.Div([dcc.Graph(id="holes-graph")]),lg=6),
+                        dbc.Col(html.Div(dcc.Graph(id="reg-graph")),lg=6)
+                    ]
+            )            
 left_row_5=dbc.Row( html.P(children="Select embassy :",style=style_text),justify="center")
 
 left_row_6=dbc.Row( dcc.Dropdown([],"",id="emb-dropdown",style=style_dropdown ))
@@ -233,10 +239,12 @@ def initialization(year):
 def on_year_change(year,session_state=None):
     global reg_list
     initialization(year)
+    #Save year
+    session_state['curr_year']=year
     #previous region. Necessary to trigger a refresh of the page
-    prev_reg=session_state.get('last_reg',reg_list[0])################################change reg_list[0] to None
+    prev_reg=session_state.get('last_reg', None)
     # Two return to cover cases where the previous region is not in the current year allowed regions
-    if prev_reg in reg_list:
+    if prev_reg and prev_reg in reg_list:
         return reg_list,prev_reg
     else:
         return reg_list,reg_list[0]
@@ -249,27 +257,43 @@ def on_year_change(year,session_state=None):
     )
 def on_region_change(region,session_state=None):
     emblist=set_emb_list(region)
-    first_emb=emblist[0]
-    return emblist,first_emb      
+    #first_emb=emblist[0]
+    #register current region
+    session_state['last_reg']=region
+    #get previous embassy
+    last_emb=session_state.get('last_emb',None)
+    if last_emb and last_emb in emblist:
+        return emblist,last_emb
+    else:
+        return emblist,emblist[0]     
 
 @app.callback(
     Output("area-graph", "figure"),
     Output("reg-graph", "figure"),
     Output("holes-graph", "figure"),
+    Output("historical-graph", "figure"),
     Input("reg-dropdown", "value"),
     )
 def display_stats_reg(reg_choice,session_state=None):
+    global historical_data
+    # get current year to display in title 
+    curr_year=session_state['curr_year']
     #Area and bar chart for regions
     Grouped_area_df_reg=prepare_area_plot_data_reg(reg_choice)
     fig_area_reg = px.area(Grouped_area_df_reg, x=Grouped_area_df_reg.index, y=Grouped_area_df_reg.columns,title=f"Status distribution across case numbers ({reg_choice})")
     fig_area_reg.update_layout(margin={"r":0,"t":50,"l":0,"b":50}) 
-    fig_reg = px.bar(Grouped_regions, x=Grouped_regions.index, y=Grouped_regions.columns, title="Regional statistics", barmode='group')    
+    fig_reg = px.bar(Grouped_regions, x=Grouped_regions.index, y=Grouped_regions.columns, title="Regional statistics ({})".format(curr_year), barmode='group')    
     fig_reg.update_layout(margin={"r":0,"t":50,"l":0,"b":50}) 
     # Holes chart
-    fig_holes = px.pie(Grouped_holes, values='holes', names='region',title="Holes distribution across regions")
+    fig_holes = px.bar(Grouped_holes, y='holes', x='region',text_auto='.2s',title="Holes distribution across regions ({})".format(curr_year))
+    fig_holes.update_layout(margin={"r":0,"t":50,"l":0,"b":50})
+    #load regional historical data
+    in_reg=historical_data['region']==reg_choice
+    fig_historical=px.line(historical_data[in_reg], x='year', y=historical_data.columns[2:],title="Trends across years ({})".format(reg_choice))
+    fig_historical.update_layout(margin={"r":0,"t":50,"l":0,"b":50})
     #save current region
     session_state['last_reg'] = reg_choice
-    return fig_area_reg,fig_reg,fig_holes
+    return fig_area_reg,fig_reg,fig_holes,fig_historical
 
 @app.callback(
     Output("emb-graph", "figure"),
