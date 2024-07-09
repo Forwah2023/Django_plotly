@@ -160,7 +160,8 @@ about_tab=dbc.Row(dbc.Col(
             html.Li([html.B("NVC (National Visa Center) : "), " Cases pending initial processing, post selection. "]),
             html.Li([html.B("der( Derivative) : "), " Dependent on a DV-Lottery case."]),
             html.Li([html.B("avg_der( Average Derivative) : "), " Average derivative per case."]),
-            html.Li([html.B(" Sum : "), " The total number of cases in each category including derivatives."]),         
+            html.Li([html.B(" Sum : "), " The total number of cases in each category including derivatives."]),  
+            html.Li([html.B(" ~max_CN : "), " The maximum case number for a given region or embassy."]), 
         ]),
                   ]
         ),class_name="description"               
@@ -186,11 +187,12 @@ explore_tab=dbc.Container(
             )
             
 sources_tab=dbc.Row(dbc.Col(
-                        html.Div([
-                                dbc.Button("GitHub", href='', color="primary", target="_blank")
+                        html.Ul([
+                                html.Li([dbc.Button("Website source code", href='https://github.com/Forwah2023', color="primary", target="_blank")]),
+                                html.Li([dbc.Button("Data collection code", href='https://github.com/Forwah2023', color="primary", target="_blank",class_name="mt-3")])
                                  ]
                         ),
-                        width={"size": 6, "offset": 2}, class_name="mt-5"
+                        width={"size": 6, "offset": 0}, class_name="mt-5"
                     ),
                     
             )
