@@ -1,53 +1,28 @@
+{% load static %}
+{% load plotly_dash%}
+{% plotly_header%}
+{% load django_bootstrap5 %}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+
 <!DOCTYPE HTML>
 <html  lang="en">
- <meta charset="utf-8">
- <meta name="viewport" content="width=device-width, initial-scale=1">
- <meta name="description" content="Django Plotly Dash App">
- <meta name="author" content="Forwah Amstrong Tah, Ph.D">
- <head>
-   {% load plotly_dash%}
-   {% load static%}
-   {% plotly_header%}
-   {% load django_bootstrap5 %}
-   {% bootstrap_css %}
-   {% bootstrap_javascript %}
-   <title>{% block title%} Django Plotly Dash{% endblock%}</title>
-      <style>
-        /* Style the header */
-        header {
-            background-color: #20c997;
-            color: white;
-            text-align: center;
-            padding: 20px;
-        }
 
-        /* Style the logo */
-        .header_text {
-            font-weight: bold;
-             font-style: italic;
-            color: white;
-        }
-		/* Style the Nav links*/
-		.mynav-link{
-		 font-weight: bold;
-		 color: white;
-		}
-		/* About box description*/
-		.description {
-            padding: 20px;
-            background-color: #ffffff;
-            border-radius: 10px;
-			margin-top: 20px;
-			border: 5px dotted lightgreen; 
-    </style>
+ <head>
+	 <meta charset="utf-8">
+	 <meta name="viewport" content="width=device-width, initial-scale=1">
+	 <meta name="description" content="Django Plotly Dash App">
+	 <meta name="author" content="Forwah Amstrong Tah, Ph.D">
+	 <link href="{% static 'css/base.css' %}" rel="stylesheet">
+	 <title>{% block title%} Django Plotly Dash{% endblock%}</title>
  </head>
  <body>
     <header>
 		<h1>Dv-Lottery statistics</h1>
         <h6 class="header_text">A Dash and Plotly app embedded in Django</h6>
         <nav>
-            <a href="#" class="mynav-link">Home</a>
-			<a href="#" class="mynav-link">Contact</a>
+            <a href="{% url 'home' %}" class="mynav-link">Home</a>
+			<a href="{% url 'about' %}" class="mynav-link">Contact</a>
         </nav>
     </header>
    <main>

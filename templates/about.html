@@ -1,0 +1,33 @@
+{%extends "base.html"%}
+{% load static %}
+{% block title%}: About {% endblock%}
+{%block content%}
+<div class="container">
+	<div class="row mt-5">
+		<!-- Profile card column -->
+		<div class="col-md-12">
+			<div class="card">
+				<div class="row g-0">
+					<div class="col-md-4">
+						<img src="{% static 'profile_pic/me.jpg'%}" class="card-img" alt="Your Profile Picture" style="width: 250px; height: 250px;">
+					</div>
+					<div class="col-md-8">
+						<div class="card-body">
+							<h5 class="card-title">Forwah Amstrong Tah, Ph.D</h5>
+							<p class="card-text">I am a freelance Python developer, Data Analyst, Researcher, and Physics teacher. I enjoy asking 
+							big questions about the universe and taking on the tough ones. You can find out more about me through the websites below.
+							
+							</p>
+							<ul class="list-unstyled">
+								<li><a href="#" target="_blank">Personal website</a></li>
+								<li><a href="#" target="_blank">Book review website</a></li>
+								<li><a href="#" target="_blank">Github</a></li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+{%endblock%}
