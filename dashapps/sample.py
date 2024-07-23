@@ -66,18 +66,25 @@ agg_dict = {'status':[holes],
             'AP':[cases],
            }
 # Global variables availble to many callbacks with their placeholder values
-#hold current ceac data
-ceac=""
-# hold ceac data grouped by regions, holes and consul
-Grouped_regions=""
-Grouped_holes=""
-Grouped_consul=""
 #hold current ceac region and corresponding embassy list
 emblist=""
 reg_list=""
 default_yr=2023
-#load historical data
-historical_data=pd.read_pickle('ceac_pkl/historical_CEAC')
+
+#load regional area chart data
+regional_area_data=pd.read_pickle('ceac_pkl/regional_case_ranges_input.pkl')
+#load historical chart data
+historical_data=pd.read_pickle('ceac_pkl/historical_CEAC.pkl')
+#regional holes bar chart data
+regional_holes_data=pd.read_pickle('ceac_pkl/regional_holes_input.pkl')
+# grouped regions bar chart data
+regional_bar_data=pd.read_pickle('ceac_pkl/regional_grouped_bar_input.pkl')
+# grouped consulate bar chart data
+consulate_bar_data=pd.read_pickle('ceac_pkl/consulate_bar_input.pkl')  
+# grouped consulate area chart data
+consulate_area_data=pd.read_pickle('ceac_pkl/consulate_case_ranges_input.pkl')
+# grouped consulate area chart data
+consulate_global_data=pd.read_pickle('ceac_pkl/consulate_global_derivative_input.pkl')
 
 # APP Layout
 right_row_0=dbc.Row(
@@ -159,7 +166,7 @@ about_tab=dbc.Row(dbc.Col(
             html.Li([html.B("Rdy( Ready): "), " Cases that are ready for visa issuance pending administrative processing or other final steps."]),
             html.Li([html.B("NVC (National Visa Center) : "), " Cases pending initial processing, post selection. "]),
             html.Li([html.B("der( Derivative) : "), " Dependent on a DV-Lottery case."]),
-            html.Li([html.B("avg_der( Average Derivative) : "), " Average derivative per case."]),
+            html.Li([html.B("Iss.Deriv.avg( Average derivative count) : "), " Average derivative per case."]),
             html.Li([html.B(" Sum : "), " The total number of cases in each category including derivatives."]),  
             html.Li([html.B(" ~max_CN : "), " The maximum case number for a given region or embassy."]), 
         ]),
@@ -189,7 +196,7 @@ explore_tab=dbc.Container(
 sources_tab=dbc.Row(dbc.Col(
                         html.Ul([
                                 html.Li([dbc.Button("Website source code", href='https://github.com/Forwah2023', color="primary", target="_blank")]),
-                                html.Li([dbc.Button("Data collection code", href='https://github.com/Forwah2023', color="primary", target="_blank",class_name="mt-3")])
+                                html.Li([dbc.Button("Data processing code", href='https://github.com/Forwah2023', color="primary", target="_blank",class_name="mt-3")])
                                  ]
                         ),
                         width={"size": 6, "offset": 0}, class_name="mt-5"
@@ -209,29 +216,14 @@ app.layout=dbc.Tabs(
 
 
 # set embassy list
-def set_emb_list(region):
-    # set emabssy dropdown options
-    bool_select=ceac['region']==region
-    emblist=sorted(ceac[bool_select]['consulate'].dropna().unique())
-    return emblist
-#Initialization
-def initialization(year):
-    global  ceac,Grouped_regions,Grouped_holes,Grouped_consul,emblist,reg_list
-    ceac= pd.read_pickle(f'ceac_pkl/cleaned_Ceac_{str(year)}.pkl')
-    # Region-specific stats
-    Grouped_regions=ceac.groupby(['region'],observed=True)[agg_cols].agg(['sum',cases])
-    Grouped_regions.dropna(inplace=True)
-    level0 =Grouped_regions.columns.get_level_values(0)
-    level1 =Grouped_regions.columns.get_level_values(1)
-    Grouped_regions.columns=['Iss','Iss_C','Ref','Ref_C','221g','221g_C','Rdy','Rdy_C','NVC','NVC_C','AP','AP_C']  # Enable for full lables =level0 + '_' + level1
-    # Holes count
-    Grouped_holes=ceac.groupby(['region'],observed=True)['status'].agg([holes]).reset_index()
-    #Embassy-specific stats
-    Grouped_consul=ceac.groupby(['consulate'])[agg_cols].agg(['sum',cases])
-    Grouped_consul.dropna(inplace=True)
+def set_emb_list(year):
+    global  emblist,reg_list,consulate_global_data
     #List of available regions embassies
-    reg_list=ceac['region'].dropna().unique()
-    emblist=set_emb_list(reg_list[0])
+    in_year=consulate_global_data['year']==str(year)
+    sub_ceac=consulate_global_data[in_year]
+    reg_list=sub_ceac['region'].cat.categories.tolist()
+    emblist=sorted(sub_ceac['consulate'].dropna().unique().tolist())
+    return
 
 @app.callback(
     Output("reg-dropdown","options"),
@@ -240,7 +232,7 @@ def initialization(year):
     )
 def on_year_change(year,session_state=None):
     global reg_list
-    initialization(year)
+    set_emb_list(year)
     #Save year
     session_state['curr_year']=year
     #previous region. Necessary to trigger a refresh of the page
@@ -258,8 +250,8 @@ def on_year_change(year,session_state=None):
     Input("reg-dropdown","value")
     )
 def on_region_change(region,session_state=None):
-    emblist=set_emb_list(region)
-    #first_emb=emblist[0]
+    global emblist
+    set_emb_list(session_state['curr_year'])
     #register current region
     session_state['last_reg']=region
     #get previous embassy
@@ -277,17 +269,23 @@ def on_region_change(region,session_state=None):
     Input("reg-dropdown", "value"),
     )
 def display_stats_reg(reg_choice,session_state=None):
-    global historical_data
+    global regional_area_data,regional_bar_data,regional_holes_data,historical_data
     # get current year to display in title 
     curr_year=session_state['curr_year']
-    #Area and bar chart for regions
-    Grouped_area_df_reg=prepare_area_plot_data_reg(reg_choice)
-    fig_area_reg = px.area(Grouped_area_df_reg, x=Grouped_area_df_reg.index, y=Grouped_area_df_reg.columns,title=f"Status distribution across case numbers ({reg_choice})")
-    fig_area_reg.update_layout(margin={"r":0,"t":50,"l":0,"b":50}) 
-    fig_reg = px.bar(Grouped_regions, x=Grouped_regions.index, y=Grouped_regions.columns, title="Regional statistics ({})".format(curr_year), barmode='group')    
+    #Area for regions
+    in_year_and_region=(regional_area_data['year']==str(curr_year)) & (regional_area_data['region']==reg_choice)
+    area_data=regional_area_data[in_year_and_region]    
+    fig_area_reg = px.area(area_data, x=area_data.Case_ranges, y=area_data.columns[3:-1],title=f"Status distribution across case numbers ({reg_choice})")
+    fig_area_reg.update_layout(margin={"r":0,"t":50,"l":0,"b":50})
+    # regional bar chart 
+    in_region=regional_bar_data['year']==str(curr_year)
+    reg_bar_data=regional_bar_data[in_region]
+    fig_reg = px.bar(reg_bar_data, x=reg_bar_data.region, y=reg_bar_data.columns[2:-1], title="Regional statistics ({})".format(curr_year), barmode='group')    
     fig_reg.update_layout(margin={"r":0,"t":50,"l":0,"b":50}) 
     # Holes chart
-    fig_holes = px.bar(Grouped_holes, y='holes', x='region',text_auto='.2s',title="Holes distribution across regions ({})".format(curr_year))
+    in_year=regional_holes_data['year']==str(curr_year)
+    holes_bar_data=regional_holes_data[in_year]
+    fig_holes = px.bar(holes_bar_data, y='holes', x='region',text_auto='.2s',title="Holes distribution across regions ({})".format(curr_year))
     fig_holes.update_layout(margin={"r":0,"t":50,"l":0,"b":50})
     #load regional historical data
     in_reg=historical_data['region']==reg_choice
@@ -304,72 +302,32 @@ def display_stats_reg(reg_choice,session_state=None):
     Input("emb-dropdown", "value")
     )
 def display_stats_emb(emb_choice,session_state=None):
-    Grouped_sub_ceac_emb=prepare_area_plot_data_emb(emb_choice)
-    fig_area_emb=px.area(Grouped_sub_ceac_emb, x=Grouped_sub_ceac_emb.index, y=Grouped_sub_ceac_emb.columns,title=f"Status distribution across case numbers ({emb_choice})")
-    fig_area_emb.update_layout(margin={"r":0,"t":50,"l":0,"b":50}) 
-    #Embassy plots
-    try:
-        emb=Grouped_consul.loc[emb_choice]
-    except KeyError:
-        print('Embassy data not found')
-        return
-    emb=emb.to_frame(name='Count').reset_index()
-    emb.columns=['Status','Sub category','Count']
-    fig_emb = px.bar(emb, x="Status", y="Count", color="Sub category", title=f"Embassy statistics ({emb_choice})")
+    global consulate_bar_data,consulate_area_data,consulate_global_data
+    #Embassy bar plot
+    #get current year and region 
+    curr_year=session_state['curr_year']
+    reg_choice=session_state['last_reg']
+    in_year_and_emb=(consulate_bar_data['year']==str(curr_year)) & (consulate_bar_data['consulate']==emb_choice)
+    emb_bar_data=consulate_bar_data[in_year_and_emb]
+    emb_bar_data=emb_bar_data[agg_cols].iloc[0]
+    emb_bar_data=emb_bar_data.to_frame(name='Count').reset_index()
+    emb_bar_data.columns=['Status','Sub category','Count']
+    fig_emb = px.bar(emb_bar_data, x="Status", y="Count", color="Sub category", title=f"Embassy statistics ({emb_choice})")
     fig_emb.update_layout(margin={"r":0,"t":50,"l":0,"b":50}) 
-    Global_derivative=prepare_global_derivative()
-    fig_global = px.choropleth(Global_derivative, locations="iso_alpha",color="Issued avg_der",hover_name="country")
+    #Embassy area plot
+    in_year_and_region_and_emb=(consulate_area_data['year']==str(curr_year)) & (consulate_area_data['region']==reg_choice)& (consulate_area_data['consulate']==emb_choice)
+    emb_area_data=consulate_area_data[in_year_and_region_and_emb]
+    fig_area_emb=px.area(emb_area_data, x=emb_area_data.Case_ranges, y=emb_area_data.columns[4:-1],title=f"Status distribution across case numbers ({emb_choice})")
+    fig_area_emb.update_layout(margin={"r":0,"t":50,"l":0,"b":50})     
+    #Embassy  global plot
+    in_year=(consulate_global_data['year']==str(curr_year))
+    global_data=consulate_global_data[in_year]
+    fig_global = px.choropleth(global_data, locations="iso_alpha",color="Iss.Deriv.avg",hover_name="country")
     fig_global.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
     #save current embassy
     session_state["last_emb"]=emb_choice
     return fig_emb,fig_area_emb,fig_global
-
-def prepare_area_plot_data_reg(reg_choice):
-    # select regional subset
-    in_region=ceac['region']==reg_choice
-    sub_ceac_reg=ceac[in_region]
-    # select and cut case numbers into bins
-    case_num=sub_ceac_reg['caseNumber'].astype(np.int64)
-    maxcase_reg=round(case_num.max(),-3)
-    num_bins_reg=round(maxcase_reg/1000)
-    case_ranges_reg=pd.cut(case_num,num_bins_reg)
-    sub_ceac_reg.insert(1,'Case_ranges',case_ranges_reg)
-    # group by case ranges
-    Grouped_sub_ceac_reg=sub_ceac_reg.groupby(['Case_ranges'],observed=True).agg(agg_dict)
-    level0 =Grouped_sub_ceac_reg.columns.get_level_values(0)
-    level1 =Grouped_sub_ceac_reg.columns.get_level_values(1)
-    Grouped_sub_ceac_reg.columns =short_legend_lable  # Enable for full lables =level0 + '_' + level1 
-    Grouped_sub_ceac_reg.index=Grouped_sub_ceac_reg.index.astype('str') 
     
-    
-    return Grouped_sub_ceac_reg
-
-def prepare_area_plot_data_emb(emb_choice):
-    # select embassy subset
-    in_emb=ceac['consulate']==emb_choice
-    sub_ceac_emb=ceac[in_emb]
-    # select and cut case numbers into bins
-    case_num_emb=sub_ceac_emb['caseNumber'].astype(np.int64)
-    maxcase_emb=round( case_num_emb.max(),-3)
-    num_bins=round(maxcase_emb/1000)
-    case_ranges_emb=pd.cut(case_num_emb,num_bins)
-    sub_ceac_emb.insert(1,'Case_ranges',case_ranges_emb)
-    
-    Grouped_sub_ceac_emb=sub_ceac_emb.groupby(['Case_ranges'],observed=True).agg(agg_dict)
-    level0 =Grouped_sub_ceac_emb.columns.get_level_values(0)
-    level1 =Grouped_sub_ceac_emb.columns.get_level_values(1)
-    Grouped_sub_ceac_emb.columns =short_legend_lable # Enable for full legend lables =level0 + '_' + level1  
-    Grouped_sub_ceac_emb.index=Grouped_sub_ceac_emb.index.astype('str')
-    return Grouped_sub_ceac_emb    
-
-def prepare_global_derivative():
-    agg_cols=['Issued']
-    Grouped_consul=ceac.groupby(['consulate'],observed=True)[agg_cols].agg([avg_der])
-    Grouped_consul.columns=Grouped_consul.columns.get_level_values(0)+' '+Grouped_consul.columns.get_level_values(1)
-    Grouped_consul=Grouped_consul.reset_index()
-    Global_derivative=Grouped_consul.merge(ISO_country_df,how='left',on='consulate')
-    return Global_derivative
-
   
 if __name__ == "__main__":
     app.run_server(debug=True)
