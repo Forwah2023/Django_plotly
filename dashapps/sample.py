@@ -225,7 +225,7 @@ def set_emb_list(year,**kwargs):
     if kwargs:
         in_region=sub_ceac_yr['region']==kwargs.get('region',"AF")
         sub_ceac_reg=sub_ceac_yr[ in_region]
-        emblist=sorted(sub_ceac_reg['consulate'].dropna().unique().tolist())
+        emblist=sorted(sub_ceac_reg['cap_cons'].dropna().unique().tolist())
     return
 
 @app.callback(
@@ -306,6 +306,8 @@ def display_stats_reg(reg_choice,session_state=None):
     )
 def display_stats_emb(emb_choice,session_state=None):
     global consulate_bar_data,consulate_area_data,consulate_global_data
+    
+    country,emb_choice=emb_choice.split(',')
     #Embassy bar plot
     #get current year and region 
     curr_year=session_state['curr_year']
@@ -328,7 +330,7 @@ def display_stats_emb(emb_choice,session_state=None):
     fig_global = px.choropleth(global_data, locations="iso_alpha",color="Iss.Deriv.avg",hover_name="country")
     fig_global.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
     #save current embassy
-    session_state["last_emb"]=emb_choice
+    session_state["last_emb"]= country+','+ emb_choice
     return fig_emb,fig_area_emb,fig_global
     
   
