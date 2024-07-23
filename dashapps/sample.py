@@ -216,13 +216,16 @@ app.layout=dbc.Tabs(
 
 
 # set embassy list
-def set_emb_list(year):
+def set_emb_list(year,**kwargs):
     global  emblist,reg_list,consulate_global_data
     #List of available regions embassies
     in_year=consulate_global_data['year']==str(year)
-    sub_ceac=consulate_global_data[in_year]
-    reg_list=sub_ceac['region'].cat.categories.tolist()
-    emblist=sorted(sub_ceac['consulate'].dropna().unique().tolist())
+    sub_ceac_yr=consulate_global_data[in_year]
+    reg_list=sub_ceac_yr['region'].cat.categories.tolist()
+    if kwargs:
+        in_region=sub_ceac_yr['region']==kwargs.get('region',"AF")
+        sub_ceac_reg=sub_ceac_yr[ in_region]
+        emblist=sorted(sub_ceac_reg['consulate'].dropna().unique().tolist())
     return
 
 @app.callback(
@@ -251,7 +254,7 @@ def on_year_change(year,session_state=None):
     )
 def on_region_change(region,session_state=None):
     global emblist
-    set_emb_list(session_state['curr_year'])
+    set_emb_list(session_state['curr_year'],region=region)
     #register current region
     session_state['last_reg']=region
     #get previous embassy
@@ -317,7 +320,7 @@ def display_stats_emb(emb_choice,session_state=None):
     #Embassy area plot
     in_year_and_region_and_emb=(consulate_area_data['year']==str(curr_year)) & (consulate_area_data['region']==reg_choice)& (consulate_area_data['consulate']==emb_choice)
     emb_area_data=consulate_area_data[in_year_and_region_and_emb]
-    fig_area_emb=px.area(emb_area_data, x=emb_area_data.Case_ranges, y=emb_area_data.columns[4:-1],title=f"Status distribution across case numbers ({emb_choice})")
+    fig_area_emb=px.bar(emb_area_data, x=emb_area_data.Case_ranges, y=emb_area_data.columns[4:-1],title=f"Status distribution across case numbers ({emb_choice})")
     fig_area_emb.update_layout(margin={"r":0,"t":50,"l":0,"b":50})     
     #Embassy  global plot
     in_year=(consulate_global_data['year']==str(curr_year))
