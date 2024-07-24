@@ -12,22 +12,32 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from pathlib import Path
 import os
+import environ
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Take environment variables from .env file
+env = environ.Env(
+    # set casting, default value
+    DEBUG=(bool, False)
+)
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-cb$a!nde8#av+i%iqerr3(ol0is@%8o5jj)!7!l+ta@2@07@00'
+SECRET_KEY = env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env('DEBUG')
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['', 'localhost', '127.0.0.1']
 
+# django-debug-toolbar
+INTERNAL_IPS = ['127.0.0.1']
 
 # Application definition
 
@@ -44,6 +54,7 @@ INSTALLED_APPS = [
     'django_plotly_dash.apps.DjangoPlotlyDashConfig',
     'dpd_static_support',
     'django_bootstrap5',
+	'debug_toolbar',
 ]
 
 MIDDLEWARE = [
@@ -57,6 +68,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django_plotly_dash.middleware.BaseMiddleware',
     'django_plotly_dash.middleware.ExternalRedirectionMiddleware',
+	'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
 ROOT_URLCONF = 'plotlyproject.urls'
@@ -190,3 +202,19 @@ PLOTLY_COMPONENTS = [
     # Other components, as needed
     'dash_bootstrap_components',
 ]
+
+
+ENVIRONMENT=env('ENVIRONMENT',default='development')
+
+if ENVIRONMENT == 'production':
+	#XSS broswer protection
+	SECURE_BROWSER_XSS_FILTER = True
+	X_FRAME_OPTIONS = 'DENY'
+	SECURE_SSL_REDIRECT = True
+	SECURE_HSTS_SECONDS = 3600 
+	SECURE_HSTS_INCLUDE_SUBDOMAINS = True 
+	SECURE_HSTS_PRELOAD = True 
+	SECURE_CONTENT_TYPE_NOSNIFF = True
+	SESSION_COOKIE_SECURE = True
+	CSRF_COOKIE_SECURE = True
+	SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
