@@ -11,10 +11,13 @@ dash-html-components==2.0.0
 dash-table==5.0.0
 Django==5.0.6
 django-bootstrap5==24.2
+django-debug-toolbar==4.4.6
+django-environ==0.11.2
 django-plotly-dash==2.3.1
 dpd-static-support==0.0.5
 dpd_components==0.1.0
 Flask==3.0.3
+gunicorn==22.0.0
 itsdangerous==2.2.0
 Jinja2==3.1.4
 MarkupSafe==2.1.5
