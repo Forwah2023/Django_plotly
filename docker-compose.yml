@@ -2,7 +2,7 @@ version: '3.28'
 services:
  web:
   build: .
-  command: gunicorn bookstore_project.wsgi -b 0.0.0.0:8000
+  command: gunicorn plotlyproject.wsgi -b 0.0.0.0:8000
   volumes:
    - .:/code
   ports:
