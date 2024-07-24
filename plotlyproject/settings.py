@@ -37,7 +37,7 @@ DEBUG = env('DEBUG')
 ALLOWED_HOSTS = ['', 'localhost', '127.0.0.1']
 
 # django-debug-toolbar
-INTERNAL_IPS = ['127.0.0.1']
+#INTERNAL_IPS = ['127.0.0.1']
 
 # Application definition
 
@@ -218,3 +218,9 @@ if ENVIRONMENT == 'production':
 	SESSION_COOKIE_SECURE = True
 	CSRF_COOKIE_SECURE = True
 	SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    
+    
+# django-debug-toolbar
+import socket
+hostname, _, ips = socket.gethostbyname_ex(socket.gethostname())
+INTERNAL_IPS = [ip[:-1] + "1" for ip in ips]
