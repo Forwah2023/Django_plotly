@@ -36,9 +36,6 @@ DEBUG = env('DEBUG')
 
 ALLOWED_HOSTS = ['', 'localhost', '127.0.0.1']
 
-# django-debug-toolbar
-#INTERNAL_IPS = ['127.0.0.1']
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -154,6 +151,10 @@ STATICFILES_FINDERS = [
     'django_plotly_dash.finders.DashComponentFinder',
     'django_plotly_dash.finders.DashAppDirectoryFinder',
 ]
+
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
@@ -219,8 +220,13 @@ if ENVIRONMENT == 'production':
 	CSRF_COOKIE_SECURE = True
 	SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
     
-    
-# django-debug-toolbar
-import socket
-hostname, _, ips = socket.gethostbyname_ex(socket.gethostname())
-INTERNAL_IPS = [ip[:-1] + "1" for ip in ips]
+
+IN_DOCKER=env('IN_DOCKER',default=False)
+if not IN_DOCKER:
+    # django-debug-toolbar for Non-Docker
+     INTERNAL_IPS = ['127.0.0.1']  
+else:     
+    # django-debug-toolbar for Docker
+    import socket
+    hostname, _, ips = socket.gethostbyname_ex(socket.gethostname())
+    INTERNAL_IPS = [ip[:-1] + "1" for ip in ips]
