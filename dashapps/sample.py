@@ -100,28 +100,34 @@ right_row_0=dbc.Row(
                     )
                 ],style=style_slider)
             )
-left_row_1=dbc.Row(dbc.Col(html.P(children="Select Region below (or year from the adjacent slider)",style=style_text) ))
-left_row_2=dbc.Row(dbc.Col(dcc.RadioItems([],"",id="reg-dropdown",inline=True,style=style_text)))
-left_row_3=dbc.Row([
+left_row_1=dbc.Row( html.H3(children="Performance by region",style=style_text),justify="center",class_name="mb-2 mt-2")
+left_row_2=dbc.Row(dbc.Col(html.P(children="Select Region below (or year from the adjacent slider)",style=style_text) ))
+left_row_3=dbc.Row(dbc.Col(dcc.RadioItems([],"",id="reg-dropdown",inline=True,style=style_text)))
+left_row_4=dbc.Row([
                         dbc.Col(html.Div(dcc.Graph(id="area-graph")),lg=6),
                         dbc.Col(html.Div([dcc.Graph(id="historical-graph")]),lg=6)                          
                     ]
-     
+                    ,class_name="mt-3"
             )
-left_row_4=dbc.Row( [
+left_row_5=dbc.Row( [
                         dbc.Col(html.Div([dcc.Graph(id="holes-graph")]),lg=6),
                         dbc.Col(html.Div(dcc.Graph(id="reg-graph")),lg=6)
                     ]
-            )            
-left_row_5=dbc.Row( html.P(children="Select embassy :",style=style_text),justify="center")
+                ,class_name="mt-3"
+            )
 
-left_row_6=dbc.Row( dcc.Dropdown([],"",id="emb-dropdown",style=style_dropdown ))
-left_row_7=dbc.Row([
+left_row_6=dbc.Row( html.H3(children="Performance by embassy",style=style_text),justify="center",class_name="mt-3")
+            
+left_row_7=dbc.Row( html.P(children="Select embassy :",style=style_text),justify="center",class_name="mt-3")
+
+left_row_8=dbc.Row( dcc.Dropdown([],"",id="emb-dropdown",style=style_dropdown ))
+left_row_9=dbc.Row([
                         dbc.Col(html.Div([dcc.Graph(id="emb-graph")]),lg=6),
                         dbc.Col(html.Div([dcc.Graph(id="emb-area-graph")]),lg=6)   
                     ]
+            ,class_name="mt-3 mb-3"
             )
-left_row_8=dbc.Row(dbc.Col(html.Div([dcc.Graph(id="global-deriv-graph")])))
+left_row_10=dbc.Row(dbc.Col(html.Div([dcc.Graph(id="global-deriv-graph")])),class_name="mt-3")
 
 
 about_tab=dbc.Row(dbc.Col(
@@ -130,7 +136,7 @@ about_tab=dbc.Row(dbc.Col(
         html.P(["This Dash app was built to provide detailed and complementary information on the DV-lottery program run by the U.S governmwent.\
         It was inspired by a similar app from ",html.A('DV Lottery Charts', href='https://dvcharts.xarthisius.xyz/ceacFY24.html'), ",and the data\
         is uses comes from that website. This app complements that website by providing more information on Holes (see glossary below), \
-        Global derivative distribution, comparative performance across DV-years, and more comple visualizations. This app was built using ",\
+        Global derivative distribution, comparative performance across DV-years, and more comprehensive visualizations. This app was built using ",\
         html.A('Plotly Dash', href='https://dash.plotly.com/')," , ",html.A('django-plotly-dash', href='https://django-plotly-dash.readthedocs.io/'),\
         " , ",html.A('Dash Bootstrap Components', href='https://dash-bootstrap-components.opensource.faculty.ai/') ," , "," Python and Django.",
         
@@ -184,7 +190,9 @@ explore_tab=dbc.Container(
                                 left_row_5,
                                 left_row_6,
                                 left_row_7,
-                                left_row_8
+                                left_row_8,
+                                left_row_9,
+                                left_row_10
                                 ],xs={"size":11,"order":2,"offset":0},lg={"size":11,"order":1,"offset":0}
                                ),
                         dbc.Col(right_row_0,xs={"size":1,"order":1,"offset":10},lg={"size":1,"order":2,"offset":0}
@@ -278,17 +286,17 @@ def display_stats_reg(reg_choice,session_state=None):
     #Area for regions
     in_year_and_region=(regional_area_data['year']==str(curr_year)) & (regional_area_data['region']==reg_choice)
     area_data=regional_area_data[in_year_and_region]    
-    fig_area_reg = px.area(area_data, x=area_data.Case_ranges, y=area_data.columns[3:-1],title=f"Status distribution across case numbers ({reg_choice})")
+    fig_area_reg = px.area(area_data, x=area_data.Case_ranges, y=area_data.columns[3:-1],title=f"Status per case-number group ({reg_choice})")
     fig_area_reg.update_layout(margin={"r":0,"t":50,"l":0,"b":50})
     # regional bar chart 
     in_region=regional_bar_data['year']==str(curr_year)
     reg_bar_data=regional_bar_data[in_region]
-    fig_reg = px.bar(reg_bar_data, x=reg_bar_data.region, y=reg_bar_data.columns[2:-1], title="Regional statistics ({})".format(curr_year), barmode='group')    
+    fig_reg = px.bar(reg_bar_data, x=reg_bar_data.region, y=reg_bar_data.columns[2:-1], title="Status distribution per region ({})".format(curr_year), barmode='group')    
     fig_reg.update_layout(margin={"r":0,"t":50,"l":0,"b":50}) 
     # Holes chart
     in_year=regional_holes_data['year']==str(curr_year)
     holes_bar_data=regional_holes_data[in_year]
-    fig_holes = px.bar(holes_bar_data, y='holes', x='region',text_auto='.2s',title="Holes distribution across regions ({})".format(curr_year))
+    fig_holes = px.bar(holes_bar_data, y='holes', x='region',text_auto='.2s',title="Holes per region ({})".format(curr_year))
     fig_holes.update_layout(margin={"r":0,"t":50,"l":0,"b":50})
     #load regional historical data
     in_reg=historical_data['region']==reg_choice
@@ -307,7 +315,7 @@ def display_stats_reg(reg_choice,session_state=None):
 def display_stats_emb(emb_choice,session_state=None):
     global consulate_bar_data,consulate_area_data,consulate_global_data
     
-    country,emb_choice=emb_choice.split(',')
+    emb_code,emb_choice=emb_choice.split(',')
     #Embassy bar plot
     #get current year and region 
     curr_year=session_state['curr_year']
@@ -317,20 +325,20 @@ def display_stats_emb(emb_choice,session_state=None):
     emb_bar_data=emb_bar_data[agg_cols].iloc[0]
     emb_bar_data=emb_bar_data.to_frame(name='Count').reset_index()
     emb_bar_data.columns=['Status','Sub category','Count']
-    fig_emb = px.bar(emb_bar_data, x="Status", y="Count", color="Sub category", title=f"Embassy statistics ({emb_choice})")
+    fig_emb = px.bar(emb_bar_data, x="Status", y="Count", color="Sub category", title=f"Selectees at {emb_code}")
     fig_emb.update_layout(margin={"r":0,"t":50,"l":0,"b":50}) 
     #Embassy area plot
     in_year_and_region_and_emb=(consulate_area_data['year']==str(curr_year)) & (consulate_area_data['region']==reg_choice)& (consulate_area_data['consulate']==emb_choice)
     emb_area_data=consulate_area_data[in_year_and_region_and_emb]
-    fig_area_emb=px.bar(emb_area_data, x=emb_area_data.Case_ranges, y=emb_area_data.columns[4:-1],title=f"Status distribution across case numbers ({emb_choice})")
+    fig_area_emb=px.bar(emb_area_data, x=emb_area_data.Case_ranges, y=emb_area_data.columns[4:-1],title=f"Status per case-number group ({emb_choice})")
     fig_area_emb.update_layout(margin={"r":0,"t":50,"l":0,"b":50})     
     #Embassy  global plot
     in_year=(consulate_global_data['year']==str(curr_year))
     global_data=consulate_global_data[in_year]
     fig_global = px.choropleth(global_data, locations="iso_alpha",color="Iss.Deriv.avg",hover_name="country")
-    fig_global.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
+    fig_global.update_layout(margin={"r":0,"t":30,"l":0,"b":0}, title={'text':"Global derivatives distribution",'x': 0.5,})
     #save current embassy
-    session_state["last_emb"]= country+','+ emb_choice
+    session_state["last_emb"]= emb_code+','+ emb_choice
     return fig_emb,fig_area_emb,fig_global
     
   
