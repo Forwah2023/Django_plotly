@@ -92,12 +92,35 @@ WSGI_APPLICATION = 'plotlyproject.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+ON_HEROKU = 'DYNO' in os.environ
+
+if ON_HEROKU:
+    # Heroku PostgreSQL configuration
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.environ.get('DATABASE_URL'),
+        }
     }
-}
+    # Heroku database config from dj_database_url
+    import dj_database_url
+    db_from_env = dj_database_url.config(
+                    conn_max_age=500,
+                    conn_health_checks=True,
+                    )
+    DATABASES['default'].update(db_from_env)
+else:
+	# Local development configuration
+	DATABASES = {
+		'default': {
+			'ENGINE': 'django.db.backends.postgresql',
+			'NAME': 'Dvdb',
+			'USER': env('DBUSER'),
+			'PASSWORD':env('DBPASSWORD'), 
+			'HOST': 'localhost',
+			'PORT': 5432
+		}
+	}
 
 
 # Password validation
