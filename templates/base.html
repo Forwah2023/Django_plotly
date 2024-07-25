@@ -1,6 +1,5 @@
 {% load static %}
 {% load plotly_dash%}
-{% plotly_header%}
 {% load django_bootstrap5 %}
 {% bootstrap_css %}
 {% bootstrap_javascript %}
@@ -15,6 +14,7 @@
 	 <meta name="author" content="Forwah Amstrong Tah, Ph.D">
 	 <link href="{% static 'css/base.css' %}" rel="stylesheet">
 	 <title>{% block title%} Django Plotly Dash{% endblock%}</title>
+	 {% plotly_header%}
  </head>
  <body>
     <header>
