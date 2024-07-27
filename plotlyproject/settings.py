@@ -94,6 +94,8 @@ WSGI_APPLICATION = 'plotlyproject.wsgi.application'
 
 ON_HEROKU = 'DYNO' in os.environ
 
+IN_DOCKER=env('IN_DOCKER',default=False)
+
 if ON_HEROKU:
     # Heroku PostgreSQL configuration
     DATABASES = {
@@ -109,6 +111,18 @@ if ON_HEROKU:
                     conn_health_checks=True,
                     )
     DATABASES['default'].update(db_from_env)
+elif IN_DOCKER :
+	# Local development in Docker configuration
+	DATABASES = {
+		'default': {
+			'ENGINE': 'django.db.backends.postgresql',
+			'NAME': 'postgres',
+			'USER': 'postgres',
+			'PASSWORD' : 'postgres',
+			'HOST':'db',
+			'PORT': 5432
+		}
+	}
 else:
 	# Local development configuration
 	DATABASES = {
@@ -244,7 +258,6 @@ if ENVIRONMENT == 'production':
 	SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
     
 
-IN_DOCKER=env('IN_DOCKER',default=False)
 if not IN_DOCKER:
     # django-debug-toolbar for Non-Docker
      INTERNAL_IPS = ['127.0.0.1']  
