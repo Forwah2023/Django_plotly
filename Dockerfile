@@ -9,6 +9,9 @@ ENV PYTHONUNBUFFERED 1
 # Set the working directory in the container
 WORKDIR /code
 
+# Install PostgreSQL client and other dependencies
+RUN apt-get update && apt-get -y install libpq-dev gcc
+
 # Install dependencies
 
 RUN pip install --no-cache-dir virtualenv
