@@ -7,3 +7,28 @@ services:
    - .:/code
   ports:
    - 8000:8000
+  depends_on:
+   - db 
+  networks:
+   - djangonetwork
+  links:
+   - db:db
+  
+ db:
+  image: postgres:13
+  environment:
+   POSTGRES_DB : 'postgres'
+   POSTGRES_USER : 'postgres'
+   POSTGRES_PASSWORD : 'postgres'
+  volumes:
+   - postgres_data:/var/lib/postgresql/data/
+  networks:
+   - djangonetwork
+
+  
+volumes:
+ postgres_data:
+ 
+networks:
+  djangonetwork:
+   driver: bridge
