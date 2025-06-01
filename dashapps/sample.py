@@ -127,7 +127,12 @@ left_row_9=dbc.Row([
                     ]
             ,class_name="mt-3 mb-3"
             )
-left_row_10=dbc.Row(dbc.Col(html.Div([dcc.Graph(id="global-deriv-graph")])),class_name="mt-3")
+left_row_10=dbc.Row(dbc.Col(html.Div([
+                                       dcc.Loading(id="loading-global",type="circle",children=dcc.Graph(id="global-deriv-graph"))
+                                     ]
+                                    )
+                            ),class_name="mt-3"
+                    )
 
 
 about_tab=dbc.Row(dbc.Col(
