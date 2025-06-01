@@ -92,10 +92,10 @@ right_row_0=dbc.Row(
                     dcc.Slider(
                         id='year-slider',
                         min=2013,
-                        max=2024,
+                        max=2025,
                         step=1,
                         value=default_yr,
-                        marks={str(year): str(year) for year in range(2013, 2025)},
+                        marks={str(year): str(year) for year in range(2013, 2026)},
                         vertical=True
                     )
                 ],style=style_slider)
