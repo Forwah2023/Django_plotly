@@ -120,6 +120,7 @@ if ON_HEROKU:
     )
     DATABASES["default"].update(db_from_env)
 elif ON_RENDER:
+    import dj_database_url
     DATABASES = {
     'default': dj_database_url.config(
     default=os.environ.get("DATABASE_URL"),
