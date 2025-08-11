@@ -37,7 +37,7 @@ DEBUG = env("DEBUG")
 SQLITEINPRODUCTION = env("SQLITEINPRODUCTION")
 
 ALLOWED_HOSTS = [
-    "django-plotly-dv.onrender.com"
+    "django-plotly-dv.onrender.com",
     "secure-peak-71101-588cd4b50a6d.herokuapp.com",
     "localhost",
     "127.0.0.1",
