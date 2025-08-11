@@ -103,7 +103,7 @@ ON_HEROKU = "DYNO" in os.environ
 IN_DOCKER = env("IN_DOCKER", default=False)
 ON_RENDER=env("ON_RENDER", default=False)
 
-if ON_HEROKU or ON_RENDER:
+if ON_HEROKU:
     # Heroku PostgreSQL configuration
     DATABASES = {
         "default": {
@@ -119,6 +119,12 @@ if ON_HEROKU or ON_RENDER:
         conn_health_checks=True,
     )
     DATABASES["default"].update(db_from_env)
+elif ON_RENDER:
+    DATABASES = {
+    'default': dj_database_url.config(
+    default=os.environ.get("DATABASE_URL"),
+    conn_max_age=600)
+    }
 elif IN_DOCKER:
     # Local development in Docker configuration
     DATABASES = {
