@@ -34,7 +34,7 @@ SECRET_KEY = env("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env("DEBUG")
 # SQLITE in Production setting
-SQLITEINPRODUCTION = env("SQLITEINPRODUCTION")
+SQLITEINPRODUCTION = env("SQLITEINPRODUCTION",default=False)
 
 ALLOWED_HOSTS = [
     "django-plotly-dv.onrender.com",
